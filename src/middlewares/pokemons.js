@@ -1,9 +1,10 @@
 const axios = require('axios');
 const response = require('../../response')
 const pokemonsTypes = require('../utils/pokemonstypes')
+const filterPokemons = require('../utils/filterPokemons')
 
 const requestPokemons = async (req, res, next) => {
-    const {offset, limit}  = req.query;
+    const {offset, limit, type}  = req.query;
     let url = '';
 
     if(limit && offset)
@@ -20,8 +21,14 @@ const requestPokemons = async (req, res, next) => {
             return {name: item.name, img:`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${index + 1}.png`, type: arrpt[index]};
         })
 
-        req.body = arrPokemons;
-        next();
+        if(type){
+            req.body = arrPokemons.filter(typePokemon => filterPokemons(typePokemon, type))
+            next();
+        }else{
+            req.body = arrPokemons;
+            next();
+        }
+
     }catch(error){
         return response.error({
             res,
@@ -80,7 +87,6 @@ const requestSearchPokemon = async (req, res, next) => {
         })
     }
 }
-
 
 module.exports = {
     requestSearchPokemon,
